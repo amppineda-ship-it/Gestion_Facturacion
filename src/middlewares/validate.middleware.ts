@@ -1,24 +1,33 @@
-import { Request, Response, NextFunction } from 'express'; // Importa los tipos de Express para tipar la petición, respuesta y función next
-import { AnyZodObject, ZodError } from 'zod'; // Importa el tipo de esquema genérico de Zod y la clase de error de validación
+import { Request, Response, NextFunction } from 'express';  
+//Aqui importamos los tipos de express Request es la peticion de usuario. // 
+//Response la respuesta del servidor. // 
+//NextFunction permite pasar al siguiente middleware. // 
 
-export const validateTask = (schema: AnyZodObject) => { // Define y exporta una función que recibe un esquema de Zod como parámetro
-    return async (req: Request, res: Response, next: NextFunction): Promise<void> => { // Retorna un middleware asíncrono con los parámetros estándar de Express
-        try { // Inicia el bloque de intento donde se ejecuta la validación
-            // Intenta validar lo que viene en el cuerpo de la petición
-            schema.parse(req.body); // Valida que el cuerpo de la petición cumpla con la estructura definida en el esquema
-            next(); // Si la validación pasa, llama a next() para continuar al siguiente middleware o controlador
-        } catch (error) { // Captura cualquier error que ocurra durante la validación
-            if (error instanceof ZodError) { // Verifica si el error es específicamente un error de validación de Zod
-                res.status(400).json({ // Envía una respuesta HTTP 400 (Bad Request) con formato JSON
-                    status: "error_validacion", // Campo que indica el tipo de error ocurrido
-                    errors: error.errors.map(err => ({ // Recorre el array de errores de Zod y los transforma en un formato personalizado
-                        campo: err.path[0], // Extrae el nombre del campo que falló la validación
-                        mensaje: err.message // Extrae el mensaje descriptivo del error de ese campo
+
+import { AnyZodObject, ZodError } from 'zod';
+//Cualquier esquema de validacion del zod y los errores producidos por el mismo. //
+
+export const validateTask = (schema: AnyZodObject) => { // Funcion reutilizable deñ zod //
+    return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        //Devuelve una funcion middleware  para Express que valida el cuerpo de la petición //
+        //  usando el esquema proporcionado. //
+
+        try { // Valida // 
+            schema.parse(req.body); // Valida los datos enviados // 
+            next();  // Si la validacion es correcta, pasa al siguiente middleware o controlador. //
+        } catch (error) { // Captura errores de validacion //
+            if (error instanceof ZodError) { // Determina si el error es un error de validacion de Zod. //
+                res.status(400).json({ // Devuelve un codigo HTTP 400 o un mensaje JSON // 
+                    status: "error_validacion",
+                    errors: error.errors.map(err => ({ //Recorre todos los errores de validacion. //
+                        campo: err.path[0], // Obtiene el campo que produjo el error. //
+                        mensaje: err.message // Obtiene el mensaje de error. //
                     }))
                 });
-                return; // Termina la ejecución del middleware para no llamar a next() después de responder
+                return;
             }
-            next(error); // Si el error no es de Zod, lo pasa al middleware de manejo de errores global
+            next(error); //Si no es error del zod, pasa el error al siguiente middleware de manejo de errores. //
+            
         }
     };
 };
