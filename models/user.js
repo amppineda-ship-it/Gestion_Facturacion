@@ -13,13 +13,29 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
     }
   }
-  User.init({
-    name: DataTypes.STRING,
-    email: DataTypes.STRING,
-    role: DataTypes.STRING
+ User.init({
+    name: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    email: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true,
+    },
+    // Se guarda el HASH de la contraseña (bcrypt), NUNCA el texto plano.
+    password: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    role: {
+      type: DataTypes.STRING,
+      defaultValue: 'client',
+    },
   }, {
     sequelize,
     modelName: 'User',
   });
+
   return User;
 };
